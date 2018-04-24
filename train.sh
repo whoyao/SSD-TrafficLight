@@ -1,0 +1,15 @@
+python3 train_ssd_network.py \
+        --train_dir=../logs \
+        --dataset_dir=./ \
+        --dataset_name=traffic_light \
+        --dataset_split_name=train \
+        --model_name=ssd_512_vgg \
+        --checkpoint_path=../VGG/VGG_VOC0712_SSD_512x512_ft_iter_120000.ckpt \
+        --checkpoint_exclude_scopes=ssd_512_vgg/block4_box,ssd_512_vgg/block7_box,ssd_512_vgg/block8_box,ssd_512_vgg/block9_box,ssd_512_vgg/block10_box,ssd_512_vgg/block11_box,ssd_512_vgg/block12_box\
+        --trainable_scopes=ssd_512_vgg/block4_box,ssd_512_vgg/block7_box,ssd_512_vgg/block8_box,ssd_512_vgg/block9_box,ssd_512_vgg/block10_box,ssd_512_vgg/block11_box,ssd_512_vgg/block12_box\
+        --save_summaries_secs=60 \
+        --save_interval_secs=600 \
+        --weight_decay=0.0005 \
+        --optimizer=adam \
+        --learning_rate=0.0005 \
+        --batch_size=4
