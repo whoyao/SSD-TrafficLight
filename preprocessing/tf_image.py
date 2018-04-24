@@ -163,6 +163,29 @@ def bboxes_crop_or_pad(bboxes,
         return bboxes
 
 
+def bboxes_resize(bboxes,
+                  height, width,
+                  target_height, target_width):
+    """Adapt bounding boxes to crop or pad operations.
+    Coordinates are always supposed to be relative to the image.
+
+    Arguments:
+      bboxes: Tensor Nx4 with bboxes coordinates [y_min, x_min, y_max, x_max];
+      height, width: Original image dimension;
+      offset_y, offset_x: Offset to apply,
+        negative if cropping, positive if padding;
+      target_height, target_width: Target dimension after cropping / padding.
+    """
+    with tf.name_scope('bboxes_resize'):
+        # Rescale bounding boxes in pixels.
+        scale = tf.cast(tf.stack([height, width, height, width]), bboxes.dtype)
+        bboxes = bboxes / scale
+        # Rescale to target dimension.
+        scale = tf.cast(tf.stack([target_height, target_width,
+                                  target_height, target_width]), bboxes.dtype)
+        bboxes = bboxes * scale
+        return bboxes
+
 def resize_image_bboxes_with_crop_or_pad(image, bboxes,
                                          target_height, target_width):
     """Crops and/or pads an image to a target width and height.
@@ -277,25 +300,6 @@ def resize_image(image, size,
         image = tf.reshape(image, tf.stack([size[0], size[1], channels]))
         return image
 
-def resize_image_with_bboxes(image, bboxes, size,
-                 method=tf.image.ResizeMethod.BILINEAR,
-                 align_corners=False):
-    """Resize an image and bounding boxes.
-    """
-    # Resize image.
-    with tf.name_scope('resize_image_with_bboxes'):
-        height, width, channels = _ImageDimensions(image)
-        scale_h = size[0]/height
-        scale_w = size[1]/width
-
-        image = tf.expand_dims(image, 0)
-        image = tf.image.resize_images(image, size,
-                                       method, align_corners)
-        image = tf.reshape(image, tf.stack([size[0], size[1], channels]))
-
-        new_bboxes[]
-
-        return image
 
 
 def random_flip_left_right(image, bboxes, seed=None):

@@ -274,9 +274,14 @@ def preprocess_for_train(image, labels, bboxes,
         #                                aspect_ratio_range=CROP_RATIO_RANGE)
 
         # Resize image to output size.
-        dst_image, bboxes = tf_image.resize_image(dst_image, bboxes, out_shape,
-                                          method=tf.image.ResizeMethod.BILINEAR,
-                                          align_corners=False)
+        dst_image = tf_image.resize_image(dst_image, out_shape,
+                                      method=tf.image.ResizeMethod.BILINEAR,
+                                      align_corners=False)
+
+        origin_shape = image.get_shape()
+        bboxes = tf_image.bboxes_resize(bboxes,origin_shape[0], origin_shape[1],
+                                        out_shape[0], out_shape[1])
+
         tf_summary_image(dst_image, bboxes, 'image_shape_distorted')
 
         # Randomly flip the image horizontally.
