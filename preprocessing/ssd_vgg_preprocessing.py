@@ -278,11 +278,10 @@ def preprocess_for_train(image, labels, bboxes,
                                       method=tf.image.ResizeMethod.BILINEAR,
                                       align_corners=False)
 
-        origin_shape = image.get_shape()
-        bboxes = tf_image.bboxes_resize(bboxes,origin_shape[0], origin_shape[1],
-                                        out_shape[0], out_shape[1])
+        bboxes = tf_image.bboxes_resize(bboxes, image,
+                                        out_shape)
 
-        tf_summary_image(dst_image, bboxes, 'image_shape_distorted')
+        tf_summary_image(dst_image, bboxes, 'image_shape_resized')
 
         # Randomly flip the image horizontally.
         dst_image, bboxes = tf_image.random_flip_left_right(dst_image, bboxes)

@@ -163,9 +163,7 @@ def bboxes_crop_or_pad(bboxes,
         return bboxes
 
 
-def bboxes_resize(bboxes,
-                  height, width,
-                  target_height, target_width):
+def bboxes_resize(bboxes, image, outshape):
     """Adapt bounding boxes to crop or pad operations.
     Coordinates are always supposed to be relative to the image.
 
@@ -177,12 +175,13 @@ def bboxes_resize(bboxes,
       target_height, target_width: Target dimension after cropping / padding.
     """
     with tf.name_scope('bboxes_resize'):
+        height, width, _ = _ImageDimensions(image)
         # Rescale bounding boxes in pixels.
         scale = tf.cast(tf.stack([height, width, height, width]), bboxes.dtype)
         bboxes = bboxes / scale
         # Rescale to target dimension.
-        scale = tf.cast(tf.stack([target_height, target_width,
-                                  target_height, target_width]), bboxes.dtype)
+        scale = tf.cast(tf.stack([outshape[0], outshape[1],
+                                  outshape[0], outshape[1]]), bboxes.dtype)
         bboxes = bboxes * scale
         return bboxes
 
