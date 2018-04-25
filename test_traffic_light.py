@@ -9,6 +9,7 @@ import numpy as np
 import os
 
 from preprocessing import ssd_vgg_preprocessing as ssd_preprocessing
+from preprocessing import tf_image
 
 slim = tf.contrib.slim
 isess = tf.InteractiveSession()
@@ -81,49 +82,52 @@ image_4d = tf.expand_dims(image_pre, 0)
 params = ssd_vgg_512.SSDNet.default_params
 ssd = ssd_vgg_512.SSDNet(params)
 
+layers_anchors = ssd.anchors(net_shape, dtype=np.float32)
+
 # Re-define the model
 with slim.arg_scope(ssd.arg_scope(weight_decay=0.0005)):
     predictions, localisations, logits, end_points = ssd.net(image_4d, is_training=False, reuse=reuse)
+    localisations = ssd.bboxes_decode(localisations, layers_anchors)
+    scores, bboxes = \
+            ssd.detected_bboxes(predictions, localisations,
+                                select_threshold=0.5,
+                                nms_threshold=0.35,
+                                clipping_bbox=None,
+                                top_k=400,
+                                keep_top_k=200)
 
-layers_anchors = ssd.anchors(net_shape, dtype=np.float32)
+
 
 
 # Main processing routine.
 def process_image(img, select_threshold=0.5, nms_threshold=0.35, net_shape=(512, 512)):
     # Run SSD network.
-    rimg, rpredictions, rlocalisations, rbbox_img = isess.run([image_4d, predictions, localisations, bbox_img],
-                                                              feed_dict={img_input: img})
-    # Compute classes and bboxes from the net outputs.
-    rclasses, rscores, rbboxes, rlayers, ridxes = ssd_common.ssd_bboxes_select(
-        rpredictions, rlocalisations, layers_anchors,
-        threshold=select_threshold, img_shape=net_shape, num_classes=21, decode=True)
-    #     print(list(zip(classes, scores)))
-    #     print(rlayers)
-    #     print(ridxes)
+    rscores, rbboxes = isess.run([scores, bboxes], feed_dict={img_input: img})
 
-    rbboxes = ssd_common.bboxes_clip(rbbox_img, rbboxes)
-    rclasses, rscores, rbboxes = ssd_common.bboxes_sort(rclasses, rscores, rbboxes,
-                                                        top_k=400, priority_inside=True, margin=0.0)
-    rclasses, rscores, rbboxes = ssd_common.bboxes_nms(rclasses, rscores, rbboxes, threshold=nms_threshold)
     # Resize bboxes to original image shape.
-    rbboxes = ssd_common.bboxes_resize(rbbox_img, rbboxes)
-    return rclasses, rscores, rbboxes
+    rbboxes = tf_image.bboxes_resize(rbboxes, img)
+
+    return rscores, rbboxes
 
 # Test on demo images.
 path = '../test/'
 image_names = sorted(os.listdir(path))
 img = mpimg.imread(path + image_names[0])
+resized_img = cv2.resize(img, (512, 512))
 
 saver = tf.train.Saver()
 saver.restore(isess, ckpt_filename)
 
-rclasses, rscores, rbboxes =  process_image(img)
+rscores, rbboxes =  process_image(resized_img)
+print(rscores)
+print('--------------------------')
+print(rbboxes)
 
 # Draw results.
-img_bboxes = np.copy(img)
-bboxes_draw_on_img(img_bboxes, rclasses, rscores, rbboxes, colors_tableau, thickness=2)
+# img_bboxes = np.copy(img)
+# bboxes_draw_on_img(img_bboxes, rclasses, rscores, rbboxes, colors_tableau, thickness=2)
 
-mpimg.imsave('output.jpeg', img_bboxes)
+# mpimg.imsave('output.jpeg', img_bboxes)
 
 # fig = plt.figure(figsize = (12, 12))
 # plt.imshow(img_bboxes)
