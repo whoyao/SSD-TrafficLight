@@ -114,6 +114,9 @@ path = '../test/'
 image_names = sorted(os.listdir(path))
 img = mpimg.imread(path + image_names[0])
 
+saver = tf.train.Saver()
+saver.restore(isess, ckpt_filename)
+
 rclasses, rscores, rbboxes =  process_image(img)
 
 # Draw results.
