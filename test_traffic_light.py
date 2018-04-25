@@ -112,8 +112,13 @@ def process_image(img, select_threshold=0.5, nms_threshold=0.35, net_shape=(512,
 # Test on demo images.
 path = '../test/'
 image_names = sorted(os.listdir(path))
-img = mpimg.imread(path + image_names[0])
-resized_img = cv2.resize(img, (512, 512))
+image_raw = tf.gfile.FastGFile(image_names[0], 'rb').read()
+image = tf.image.decode_png(image_raw)
+#img = mpimg.imread(path + image_names[0])
+#resized_img = cv2.resize(img, (512, 512))
+resized_img = tf_image.resize_image(image, net_shape,
+                            method=tf.image.ResizeMethod.BILINEAR,
+                            align_corners=False)
 
 saver = tf.train.Saver()
 saver.restore(isess, ckpt_filename)
