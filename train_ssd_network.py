@@ -33,7 +33,7 @@ DATA_FORMAT = 'NCHW'
 tf.app.flags.DEFINE_float(
     'loss_alpha', 1., 'Alpha parameter in the loss function.')
 tf.app.flags.DEFINE_float(
-    'negative_ratio', 3., 'Negative ratio in the loss function.')
+    'negative_ratio', 2., 'Negative ratio in the loss function.')
 tf.app.flags.DEFINE_float(
     'match_threshold', 0.5, 'Matching threshold in the loss function.')
 
