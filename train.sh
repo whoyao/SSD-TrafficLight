@@ -12,4 +12,4 @@ python3 train_ssd_network.py \
         --weight_decay=0.0005 \
         --optimizer=adam \
         --learning_rate=0.0005 \
-        --batch_size=4
+        --batch_size=16
