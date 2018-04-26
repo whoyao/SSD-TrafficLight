@@ -274,9 +274,11 @@ def preprocess_for_train(image, labels, bboxes,
         #                                aspect_ratio_range=CROP_RATIO_RANGE)
 
         # Resize image to output size.
-        dst_image = tf_image.resize_image(dst_image, out_shape,
-                                      method=tf.image.ResizeMethod.BILINEAR,
-                                      align_corners=False)
+        # dst_image = tf_image.resize_image(dst_image, out_shape,
+        #                               method=tf.image.ResizeMethod.BILINEAR,
+        #                               align_corners=False)
+
+        dst_image, bboxes = tf_image.crop_image_bboxes(dst_image, bboxes)
 
         tf_summary_image(dst_image, bboxes, 'image_shape_resized')
 

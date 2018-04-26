@@ -163,7 +163,10 @@ def bboxes_crop_or_pad(bboxes,
         return bboxes
 
 
-def bboxes_resize(bboxes, image):
+def bboxes_resize(bboxes,
+                  h_min, h_max,
+                  w_min, w_max,
+                  size = 300):
     """Adapt bounding boxes to crop or pad operations.
     Coordinates are always supposed to be relative to the image.
 
@@ -175,10 +178,10 @@ def bboxes_resize(bboxes, image):
       target_height, target_width: Target dimension after cropping / padding.
     """
     with tf.name_scope('bboxes_resize'):
-        height, width, _ = _ImageDimensions(image)
         # Rescale bounding boxes in pixels.
-        scale = tf.cast(tf.stack([height, width, height, width]), bboxes.dtype)
-        bboxes = bboxes * scale
+        offset = tf.cast(tf.stack([h_min, w_min, h_max, w_max]), bboxes.dtype)
+        bboxes = bboxes - offset/size
+
         return bboxes
 
 def resize_image_bboxes_with_crop_or_pad(image, bboxes,
@@ -295,6 +298,47 @@ def resize_image(image, size,
         image = tf.reshape(image, tf.stack([size[0], size[1], channels]))
         return image
 
+
+
+def crop_image_bboxes(image, bboxes,
+                 size=300,
+                 method=tf.image.ResizeMethod.BILINEAR,
+                 align_corners=False):
+    """Resize an image and bounding boxes.
+    """
+    # Resize image.
+    with tf.name_scope('crop_image_bboxes'):
+        height, width, channels = _ImageDimensions(image)
+
+        height_bbox = bboxes[0, 2] - bboxes[0, 0]
+        weight_bbox = bboxes[0, 3] - bboxes[0, 1]
+
+        if height_bbox > 300 or weight_bbox > 300 :
+            return image, bboxes
+
+        center_h = bboxes[0, 0] + bboxes[0, 2]
+        center_w = bboxes[0, 1] + bboxes[0, 3]
+
+        offset_h_min = max(center_h - size//2, 0)
+        offset_h_max = min(offset_h_min + size, height)
+        offset_h = offset_h_max - size
+
+        offset_w_min = max(center_w - size//2, 0)
+        offset_w_max = min(offset_w_min + size, width)
+        offset_w = offset_w_max - size
+
+        image = tf.image.crop_to_bounding_box(image,
+                                              offset_h, offset_w,
+                                              size, size)
+
+        image = tf.expand_dims(image, 0)
+        image = tf.image.resize_images(image, size,
+                                       method, align_corners)
+        image = tf.reshape(image, tf.stack([size[0], size[1], channels]))
+
+        bboxes = bboxes_resize(bboxes, offset_h_min, offset_h_max, offset_w_min, offset_w_max)
+
+        return image, bboxes
 
 
 def random_flip_left_right(image, bboxes, seed=None):
