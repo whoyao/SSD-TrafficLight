@@ -15,7 +15,7 @@
 """Generic training script that trains a SSD model using a given dataset."""
 import tensorflow as tf
 from tensorflow.python.ops import control_flow_ops
-from temsorflow.python import debug as tf_debug
+from tensorflow.python import debug as tf_debug
 
 from datasets import traffic_light
 from deployment import model_deploy
@@ -52,7 +52,7 @@ tf.app.flags.DEFINE_integer(
     'The number of parallel readers that read data from the dataset.')
 tf.app.flags.DEFINE_integer(
     'num_preprocessing_threads', 4,
-    'The number of threads used to create the batches.')ƒ
+    'The number of threads used to create the batches.')
 
 tf.app.flags.DEFINE_integer(
     'log_every_n_steps', 10,
@@ -380,8 +380,8 @@ def main(_):
             saver=saver,
             save_interval_secs=FLAGS.save_interval_secs,
             session_config=config,
-            sync_optimizer=None,
-            session_wrapper=tf_debug.LocalCLIDebugWrapperSession)
+            sync_optimizer=None)
+        #    session_wrapper=tf_debug.LocalCLIDebugWrapperSession)
 
 
 if __name__ == '__main__':
