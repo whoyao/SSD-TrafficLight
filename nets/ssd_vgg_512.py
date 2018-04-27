@@ -544,6 +544,8 @@ def ssd_losses(logits, localisations,
                 fpmask = tf.cast(pmask, dtype)
                 n_positives = tf.reduce_sum(fpmask)
 
+                n_positives = tf.Print(n_positives, [n_positives], message='n_positives')
+
                 # Select some random negative entries.
                 # n_entries = np.prod(gclasses[i].get_shape().as_list())
                 # r_positive = n_positives / n_entries
