@@ -183,16 +183,11 @@ def bboxes_resize(bboxes,
         bboxes = bboxes * scale
         bbox_heights = bboxes[:, 2] - bboxes[:, 0]
         bbox_widths = bboxes[:, 3] - bboxes[:, 1]
-        bbox_widths = tf.Print(bbox_widths, [bbox_widths], message='bbox_widths')
-        bbox_heights = tf.Print(bbox_heights, [bbox_heights], message='bbox_height')
         center = tf.cast(tf.stack([cen_h, cen_w, cen_h, cen_w]), bboxes.dtype)
         bboxes_h_w = tf.cast(tf.stack([-bbox_heights/2, -bbox_widths/2, bbox_heights/2, bbox_widths/2], axis=1), bboxes.dtype)
-        bboxes_h_w = tf.Print(bboxes_h_w, [bboxes_h_w], message='bboxes_hw', summarize=20)
         bboxes = bboxes_h_w + center
-        bboxes = tf.Print(bboxes, [bboxes], message='bboxes_1', summarize=20)
         offset = tf.cast(tf.stack([h_min, w_min, h_min, w_min]), bboxes.dtype)
         bboxes = bboxes - offset
-        bboxes = tf.Print(bboxes, [bboxes], message='bboxes_f', summarize=20)
         scale = tf.cast(tf.stack([size, size, size, size]), bboxes.dtype)
         bboxes = bboxes / scale
         return bboxes
@@ -368,7 +363,6 @@ def crop_image_bboxes(image, bboxes, size,
         image = tf.reshape(image, tf.stack([size[0], size[1], channels]))
 
         bboxes = bboxes_resize(bboxes, offset_h_min, offset_w_min, center_h, center_w)
- #       bboxes = tf.Print(bboxes,[bboxes],message='bboxes')
 
         return image, bboxes
 
