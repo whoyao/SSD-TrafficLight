@@ -91,25 +91,54 @@ def plt_bboxes(img, classes, scores, bboxes, figsize=(10,10), linewidth=1.5, sav
     height = img.shape[0]
     width = img.shape[1]
     colors = dict()
+    max_score = 0
+    index = 0
     for i in range(classes.shape[0]):
         cls_id = int(classes[i])
         if cls_id >= 0:
             score = scores[i]
-            if cls_id not in colors:
-                colors[cls_id] = (random.random(), random.random(), random.random())
-            ymin = int(bboxes[i, 0] * height)
-            xmin = int(bboxes[i, 1] * width)
-            ymax = int(bboxes[i, 2] * height)
-            xmax = int(bboxes[i, 3] * width)
-            rect = plt.Rectangle((xmin, ymin), xmax - xmin,
-                                 ymax - ymin, fill=False,
-                                 edgecolor=colors[cls_id],
-                                 linewidth=linewidth)
-            plt.gca().add_patch(rect)
-            class_name = str(cls_id)
-            plt.gca().text(xmin, ymin - 2,
-                           '{:s} | {:.3f}'.format(class_name, score),
-                           bbox=dict(facecolor=colors[cls_id], alpha=0.5),
-                           fontsize=12, color='white')
+            if score > max_score:
+                max_score = score
+                index = cls_id
+                id = i
+
+    if max_score > 0:
+        if index not in colors:
+            colors[index] = (random.random(), random.random(), random.random())
+        ymin = int(bboxes[id, 0] * height)
+        xmin = int(bboxes[id, 1] * width)
+        ymax = int(bboxes[id, 2] * height)
+        xmax = int(bboxes[id, 3] * width)
+        rect = plt.Rectangle((xmin, ymin), xmax - xmin,
+                             ymax - ymin, fill=False,
+                             edgecolor=colors[index],
+                             linewidth=linewidth)
+        plt.gca().add_patch(rect)
+        class_name = str(index)
+        plt.gca().text(xmin, ymin - 2,
+                       '{:s} | {:.3f}'.format(class_name, max_score),
+                       bbox=dict(facecolor=colors[index], alpha=0.5),
+                       fontsize=12, color='white')
+
+#    for i in range(classes.shape[0]):
+#        cls_id = int(classes[i])
+#        if cls_id >= 0:
+#            score = scores[i]
+#            if cls_id not in colors:
+#                colors[cls_id] = (random.random(), random.random(), random.random())
+#            ymin = int(bboxes[i, 0] * height)
+#            xmin = int(bboxes[i, 1] * width)
+#            ymax = int(bboxes[i, 2] * height)
+#            xmax = int(bboxes[i, 3] * width)
+#            rect = plt.Rectangle((xmin, ymin), xmax - xmin,
+#                                 ymax - ymin, fill=False,
+#                                 edgecolor=colors[cls_id],
+#                                 linewidth=linewidth)
+#            plt.gca().add_patch(rect)
+#            class_name = str(cls_id)
+#            plt.gca().text(xmin, ymin - 2,
+#                           '{:s} | {:.3f}'.format(class_name, score),
+#                           bbox=dict(facecolor=colors[cls_id], alpha=0.5),
+#                           fontsize=12, color='white')
     #plt.show()
     plt.savefig(save_name)
