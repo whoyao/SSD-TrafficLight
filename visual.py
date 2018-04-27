@@ -83,7 +83,7 @@ for image_name in image_names:
     # plt.imshow(img4)
 
     rclasses, rscores, rbboxes =  process_image(img4)
-    cv2.imwrite(outpath+img4)
+    visualization.plt_bboxes(img4, rclasses, rscores, rbboxes, save_name=outpath+image_name)
 
 ## visualization.bboxes_draw_on_img(img, rclasses, rscores, rbboxes, visualization.colors_plasma)
 #visualization.plt_bboxes(img4, rclasses, rscores, rbboxes)
