@@ -83,7 +83,7 @@ def bboxes_draw_on_img(img, classes, scores, bboxes, colors, thickness=2):
 # =========================================================================== #
 # Matplotlib show...
 # =========================================================================== #
-def plt_bboxes(img, classes, scores, bboxes, figsize=(10,10), linewidth=1.5):
+def plt_bboxes(img, classes, scores, bboxes, figsize=(10,10), linewidth=1.5, save_name=None):
     """Visualize bounding boxes. Largely inspired by SSD-MXNET!
     """
     fig = plt.figure(figsize=figsize)
@@ -111,4 +111,5 @@ def plt_bboxes(img, classes, scores, bboxes, figsize=(10,10), linewidth=1.5):
                            '{:s} | {:.3f}'.format(class_name, score),
                            bbox=dict(facecolor=colors[cls_id], alpha=0.5),
                            fontsize=12, color='white')
-    plt.show()
+    #plt.show()
+    plt.savefig(save_name)
