@@ -42,7 +42,7 @@ _B_MEAN = 104.
 BBOX_CROP_OVERLAP = 0.5         # Minimum overlap to keep a bbox after cropping.
 MIN_OBJECT_COVERED = 0.25
 CROP_RATIO_RANGE = (0.6, 1.67)  # Distortion ratio during cropping.
-EVAL_SIZE = (300, 300)
+EVAL_SIZE = (512, 512)
 
 
 def tf_image_whitened(image, means=[_R_MEAN, _G_MEAN, _B_MEAN]):
@@ -278,7 +278,7 @@ def preprocess_for_train(image, labels, bboxes,
         #                               method=tf.image.ResizeMethod.BILINEAR,
         #                               align_corners=False)
 
-        dst_image, bboxes = tf_image.crop_image_bboxes(dst_image, bboxes)
+        dst_image, bboxes = tf_image.crop_image_bboxes(dst_image, bboxes, size=(512,512))
 
         tf_summary_image(dst_image, bboxes, 'image_shape_resized')
 

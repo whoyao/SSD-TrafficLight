@@ -164,8 +164,8 @@ def bboxes_crop_or_pad(bboxes,
 
 
 def bboxes_resize(bboxes,
-                  h_min, h_max,
-                  w_min, w_max,
+                  h_min, w_min,
+                  cen_h, cen_w,
                   size = 300):
     """Adapt bounding boxes to crop or pad operations.
     Coordinates are always supposed to be relative to the image.
@@ -179,9 +179,18 @@ def bboxes_resize(bboxes,
     """
     with tf.name_scope('bboxes_resize'):
         # Rescale bounding boxes in pixels.
-        offset = tf.cast(tf.stack([h_min, w_min, h_max, w_max]), bboxes.dtype)
-        bboxes = bboxes - offset/size
-
+        scale = tf.cast(tf.stack([600, 800, 600, 800]), bboxes.dtype)
+        bboxes = bboxes * scale
+        bbox_heights = bboxes[:,2] - bboxes[:,0]
+        bbox_widths = bboxes[:,3] - bboxes[:,1]
+        bbox_widths = tf.Print
+        center = tf.cast(tf.stack([cen_h, cen_w, cen_h, cen_w]), bboxes.dtype)
+        bboxes_h_w = tf.cast(tf.stack([-bbox_heights/2, -bbox_widths/2, bbox_heights/2, bbox_widths/2]), bboxes.dtype)
+        bboxes = bboxes_h_w + center
+        offset = tf.cast(tf.stack([h_min, w_min, h_min, w_min]), bboxes.dtype)
+        bboxes = bboxes - offset
+        scale = tf.cast(tf.stack([size, size, size, size]), bboxes.dtype)
+        bboxes = bboxes / scale
         return bboxes
 
 def resize_image_bboxes_with_crop_or_pad(image, bboxes,
@@ -300,43 +309,62 @@ def resize_image(image, size,
 
 
 
-def crop_image_bboxes(image, bboxes,
-                 size=300,
+def crop_image_bboxes(image, bboxes, size,
+                 crop_size=300,
                  method=tf.image.ResizeMethod.BILINEAR,
                  align_corners=False):
     """Resize an image and bounding boxes.
     """
     # Resize image.
     with tf.name_scope('crop_image_bboxes'):
+        def max_(x, y):
+            if _is_tensor(x) or _is_tensor(y):
+                return math_ops.maximum(x, y)
+            else:
+                return max(x, y)
+
+        def min_(x, y):
+            if _is_tensor(x) or _is_tensor(y):
+                return math_ops.minimum(x, y)
+            else:
+                return min(x, y)
+
+        def equal_(x, y):
+            if _is_tensor(x) or _is_tensor(y):
+                return math_ops.equal(x, y)
+            else:
+                return x == y
+        
         height, width, channels = _ImageDimensions(image)
 
         height_bbox = bboxes[0, 2] - bboxes[0, 0]
         weight_bbox = bboxes[0, 3] - bboxes[0, 1]
 
-        if height_bbox > 300 or weight_bbox > 300 :
-            return image, bboxes
+        center_h_f = (bboxes[0, 0] + bboxes[0, 2])/2*tf.cast(height,tf.float32)
+        center_w_f = (bboxes[0, 1] + bboxes[0, 3])/2*tf.cast(width,tf.float32)
+        
+        center_h = tf.cast(center_h_f, tf.int32)
+        center_w = tf.cast(center_w_f, tf.int32)
+        
+        offset_h_min = tf.maximum(center_h - crop_size//2, 0)
+        offset_h_max = tf.minimum(offset_h_min + crop_size, height)
+        offset_h = offset_h_max - crop_size
 
-        center_h = bboxes[0, 0] + bboxes[0, 2]
-        center_w = bboxes[0, 1] + bboxes[0, 3]
-
-        offset_h_min = max(center_h - size//2, 0)
-        offset_h_max = min(offset_h_min + size, height)
-        offset_h = offset_h_max - size
-
-        offset_w_min = max(center_w - size//2, 0)
-        offset_w_max = min(offset_w_min + size, width)
-        offset_w = offset_w_max - size
+        offset_w_min = tf.cast(tf.maximum(center_w - crop_size//2, 0), tf.int32)
+        offset_w_max = tf.cast(tf.minimum(offset_w_min + crop_size, width), tf.int32)
+        offset_w = offset_w_max - crop_size
 
         image = tf.image.crop_to_bounding_box(image,
                                               offset_h, offset_w,
-                                              size, size)
+                                              crop_size, crop_size)
 
         image = tf.expand_dims(image, 0)
         image = tf.image.resize_images(image, size,
                                        method, align_corners)
         image = tf.reshape(image, tf.stack([size[0], size[1], channels]))
 
-        bboxes = bboxes_resize(bboxes, offset_h_min, offset_h_max, offset_w_min, offset_w_max)
+        bboxes = bboxes_resize(bboxes, offset_h_min, offset_w_min, center_h, center_w)
+ #       bboxes = tf.Print(bboxes,[bboxes],message='bboxes')
 
         return image, bboxes
 
