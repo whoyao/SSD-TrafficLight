@@ -280,8 +280,6 @@ def preprocess_for_train(image, labels, bboxes,
 
         dst_image, bboxes = tf_image.crop_image_bboxes(dst_image, bboxes, size=(512,512))
 
-        tf_summary_image(dst_image, bboxes, 'image_shape_resized')
-
         # Randomly flip the image horizontally.
         dst_image, bboxes = tf_image.random_flip_left_right(dst_image, bboxes)
 
@@ -292,6 +290,7 @@ def preprocess_for_train(image, labels, bboxes,
         #        num_cases=4)
         #tf_summary_image(dst_image, bboxes, 'image_color_distorted')
 
+        tf_summary_image(dst_image, bboxes, 'image_shape_resized')
         # Rescale to VGG input scale.
         image = dst_image * 255.
         image = tf_image_whitened(image, [_R_MEAN, _G_MEAN, _B_MEAN])
