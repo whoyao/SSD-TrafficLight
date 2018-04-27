@@ -1,4 +1,4 @@
-python3 train_ssd_network.py \
+python3.5 train_ssd_network.py \
         --train_dir=../logs \
         --dataset_dir=./ \
         --dataset_name=traffic_light \
