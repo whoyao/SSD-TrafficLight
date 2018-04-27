@@ -71,14 +71,19 @@ def process_image(img, select_threshold=0.58, nms_threshold=.7, net_shape=(512, 
 
 # Test on some demo image and visualize output.
 path = '../test/'
+outpath = '../out/'
 image_names = sorted(os.listdir(path))
-img = cv2.imread(path+image_names[0])
-img2=img[0:300,200:600] 
-img3=img2[: , : , : : -1]
-img4 = cv2.resize(img3,(800,600))
-# plt.imshow(img4)
 
-rclasses, rscores, rbboxes =  process_image(img4)
+for image_name in image_names:
 
-# visualization.bboxes_draw_on_img(img, rclasses, rscores, rbboxes, visualization.colors_plasma)
-visualization.plt_bboxes(img4, rclasses, rscores, rbboxes)
+    img = cv2.imread(path+image_name)
+    img2=img[0:300,200:600]
+    img3=img2[: , : , : : -1]
+    img4 = cv2.resize(img3,(800,600))
+    # plt.imshow(img4)
+
+    rclasses, rscores, rbboxes =  process_image(img4)
+    cv2.imwrite(outpath+img4)
+
+## visualization.bboxes_draw_on_img(img, rclasses, rscores, rbboxes, visualization.colors_plasma)
+#visualization.plt_bboxes(img4, rclasses, rscores, rbboxes)
