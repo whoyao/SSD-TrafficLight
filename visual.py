@@ -51,7 +51,7 @@ ssd_anchors = ssd_net.anchors(net_shape)
 
 
 # Main image processing routine.
-def process_image(img, select_threshold=0.58, nms_threshold=.7, net_shape=(512, 512)):
+def process_image(img, select_threshold=0.1, nms_threshold=.7, net_shape=(512, 512)):
     # Run SSD network.
 
     rimg, rpredictions, rlocalisations, rbbox_img = isess.run([image_4d, predictions, localisations, bbox_img],
@@ -77,9 +77,9 @@ image_names = sorted(os.listdir(path))
 for image_name in image_names:
 
     img = cv2.imread(path+image_name)
-    img2=img[0:300,200:600]
+    img2=img[0:300,250:550]
     img3=img2[: , : , : : -1]
-    img4 = cv2.resize(img3,(800,600))
+    img4 = cv2.resize(img3,(512,512))
     # plt.imshow(img4)
 
     rclasses, rscores, rbboxes =  process_image(img4)
