@@ -87,13 +87,13 @@ class SSDNet(object):
                       (296.96, 378.88),
                       (378.88, 460.8),
                       (460.8, 542.72)],
-        anchor_ratios=[[.25, .5],
-                       [.25, .5, 1/3, .2],
-                       [.25, .5, 1/3, .2],
-                       [.25, .5, 1/3, .2],
-                       [.25, .5, 1/3, .2],
-                       [.25, .5],
-                       [.25, .5]],
+        anchor_ratios=[[.25, 1/3],
+                       [.25, 1/3],
+                       [.25, 1/3],
+                       [.25, 1/3],
+                       [.25, 1/3],
+                       [.25, 1/3],
+                       [.25, 1/3]],
         anchor_steps=[8, 16, 32, 64, 128, 256, 512],
         anchor_offset=0.5,
         normalizations=[20, -1, -1, -1, -1, -1, -1],
@@ -544,8 +544,6 @@ def ssd_losses(logits, localisations,
                 fpmask = tf.cast(pmask, dtype)
                 n_positives = tf.reduce_sum(fpmask)
 
-                n_positives = tf.Print(n_positives, [n_positives], message='n_positives')
-
                 # Select some random negative entries.
                 # n_entries = np.prod(gclasses[i].get_shape().as_list())
                 # r_positive = n_positives / n_entries
@@ -567,6 +565,8 @@ def ssd_losses(logits, localisations,
                 n_neg = tf.maximum(n_neg, tf.shape(nvalues)[0] * 4)
                 max_neg_entries = 1 + tf.cast(tf.reduce_sum(fnmask), tf.int32)
                 n_neg = tf.minimum(n_neg, max_neg_entries)
+
+ #               nvalues_flat = tf.Print(nvalues_flat, [nvalues_flat], message='nvalues_flat', summarize=200)
 
                 val, idxes = tf.nn.top_k(-nvalues_flat, k=n_neg)
                 minval = val[-1]

@@ -35,7 +35,7 @@ tf.app.flags.DEFINE_float(
 tf.app.flags.DEFINE_float(
     'negative_ratio', 2., 'Negative ratio in the loss function.')
 tf.app.flags.DEFINE_float(
-    'match_threshold', 0.5, 'Matching threshold in the loss function.')
+    'match_threshold', 0.85, 'Matching threshold in the loss function.')
 
 # =========================================================================== #
 # General Flags.

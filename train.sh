@@ -11,5 +11,5 @@ python3.5 train_ssd_network.py \
         --save_interval_secs=600 \
         --weight_decay=0.0005 \
         --optimizer=adam \
-        --learning_rate=0.0001 \
+        --learning_rate=0.0005 \
         --batch_size=16
